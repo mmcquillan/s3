@@ -179,6 +179,17 @@ namespace s3
                             break;
                     }
                     break;
+                case "move":
+                    switch (cmd.Length)
+                    {
+                        case 3:
+                            s3.move(cmd[1], cmd[2]);
+                            break;
+                        default:
+                            Help();
+                            break;
+                    }
+                    break;
                 case "get":
                     switch (cmd.Length)
                     {
@@ -259,10 +270,11 @@ namespace s3
 			Console.WriteLine("  mkdir {bucket}");
 			Console.WriteLine("  rmdir {bucket}");
 			Console.WriteLine("  rm {bucket} {file}");
-			Console.WriteLine("  put {bucket} {file} [key] [acl]");
+            Console.WriteLine("  put {bucket} {file} [key] [acl]");
 			Console.WriteLine("  mput {bucket} {directory} [file filter: *.xaml]");
             Console.WriteLine("  mputr {bucket} {directory} {file filter: *.xaml}");
             Console.WriteLine("  mputl {bucket} {input file}");
+            Console.WriteLine("  move {bucket} {file}");
             Console.WriteLine("  get {bucket} {key} [output directory]");
             Console.WriteLine("  mgetl {bucket} {input file} [output directory]");
 		    Console.WriteLine("  acl {AuthenticatedRead | BucketOwnerFullControl | BucketOwnerRead | ");

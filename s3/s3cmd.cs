@@ -4,6 +4,8 @@ using System.Collections;
 using System.Xml;
 using System.Threading;
 using System.Net;
+using System.Text;
+using System.Security.Cryptography;
 using Amazon;
 using Amazon.S3;
 using Amazon.S3.Model;
@@ -360,6 +362,23 @@ namespace s3
             }
         }
 
+        public void move(string bucket, string file)
+        {
+            string fileChecksum = GetFileChecksum(file);
+            string key = file.Substring(file.LastIndexOf('\\') + 1);
+            this.put(bucket, file, key);
+            string s3Checksum = GetS3Checksum(bucket, key);
+            if (fileChecksum == s3Checksum)
+            {
+                File.Delete(file);
+                Console.WriteLine("Checksums match and the local file '" + file + "' is deleted.");
+            }
+            else
+            {
+                Console.WriteLine("Error: Checksums do not match and the local file '" + file + "' is not deleted.");
+            }
+        }
+
         public void get(string bucket, string key, string dir)
         {
             s3Get get = new s3Get(awsKey, awsSecret, bucket, dir, key, maxRetry);
@@ -443,6 +462,28 @@ namespace s3
 
 			return allfiles;
 		}
+
+        // md5 file cheksum
+        private string GetFileChecksum(string file)
+        {
+            using (FileStream stream = File.OpenRead(file))
+            {
+                MD5 md5 = new MD5CryptoServiceProvider();
+                byte[] checksum = md5.ComputeHash(stream);
+                return BitConverter.ToString(checksum).Replace("-", String.Empty).ToUpper();
+            }
+        }
+
+        // md5 s3 checksum
+        private string GetS3Checksum(string bucket, string key)
+        {
+            GetObjectMetadataRequest req = new GetObjectMetadataRequest();
+            req.BucketName = bucket;
+            req.Key = key;
+            GetObjectMetadataResponse res = new GetObjectMetadataResponse();
+            res = s3Client.GetObjectMetadata(req);
+            return res.ETag.ToUpper().Replace("\"", "");
+        }
 
 	}
 }
