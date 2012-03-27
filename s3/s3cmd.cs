@@ -98,6 +98,24 @@ namespace s3
             }
         }
 
+        public void exists(string bucket, string key)
+        {
+            GetObjectMetadataRequest req = new GetObjectMetadataRequest();
+            req.BucketName = bucket;
+            req.Key = key;
+            GetObjectMetadataResponse res = new GetObjectMetadataResponse();
+            try
+            {
+                res = s3Client.GetObjectMetadata(req);
+                Console.WriteLine("true");
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("false");
+            }
+
+        }
+
         public void csv(string bucket)
         {
             string nextmarker = "";

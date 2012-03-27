@@ -115,6 +115,17 @@ namespace s3
 							break;
 					}
 					break;
+                case "exists":
+                    switch (cmd.Length)
+                    {
+                        case 3:
+                            s3.exists(cmd[1], cmd[2]);
+                            break;
+                        default:
+                            Help();
+                            break;
+                    }
+                    break;
 				case "rm":
 					switch ( cmd.Length )
 					{
@@ -269,6 +280,7 @@ namespace s3
             Console.WriteLine("  csv {bucket}");
 			Console.WriteLine("  mkdir {bucket}");
 			Console.WriteLine("  rmdir {bucket}");
+            Console.WriteLine("  exists {bucket} {key}");
 			Console.WriteLine("  rm {bucket} {file}");
             Console.WriteLine("  put {bucket} {file} [key] [acl]");
 			Console.WriteLine("  mput {bucket} {directory} [file filter: *.xaml]");
