@@ -52,6 +52,7 @@ namespace s3
                     // request object with file
                     PutObjectRequest req = new PutObjectRequest();
                     req.BucketName = bucket;
+                    req.Key = key;
                     req.FilePath = file;
                     req.CannedACL = ACL();
                     req.Timeout = 120 * 60 * 1000;
