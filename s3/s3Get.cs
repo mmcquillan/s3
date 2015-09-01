@@ -14,17 +14,19 @@ namespace s3
         // properties
         private string awsKey;
         private string awsSecret;
+        private string region;
         private string bucket;
         private string file;
         private string key;
         private int retry;
         
         // constructer
-        public s3Get(string awsAccessKeyId, string awsSecretAccessKey, string Bucket, string Dir, string Key, int Retry)
+        public s3Get(string awsAccessKeyId, string awsSecretAccessKey, string Region, string Bucket, string Dir, string Key, int Retry)
         {
             // set vars
             awsKey = awsAccessKeyId;
             awsSecret = awsSecretAccessKey;
+            region = Region;
             bucket = Bucket;
             key = Key;
             retry = Retry;
@@ -49,7 +51,7 @@ namespace s3
             {
 
                 // make the amazon client
-                AmazonS3 s3Client = AWSClientFactory.CreateAmazonS3Client(awsKey, awsSecret);
+                AmazonS3Client s3Client = new AmazonS3Client(awsKey, awsSecret, RegionEndpoint.GetBySystemName(region));
 
                 try
                 {

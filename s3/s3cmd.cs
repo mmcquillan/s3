@@ -15,20 +15,22 @@ namespace s3
 	class s3cmd
 	{
 
-		private AmazonS3 s3Client;
+		private AmazonS3Client s3Client;
         private string awsKey;
         private string awsSecret;
+        private string region;
         private int maxThreads = 0;
         private int maxRetry = 3;
 	    private string ACL = "";
         private int putTimeout = 0;
 
-        public s3cmd(string awsAccessKeyId, string awsSecretAccessKey)
+        public s3cmd(string awsAccessKeyId, string awsSecretAccessKey, string Region)
 		{
 			// setup configuration
-            this.awsKey = awsAccessKeyId;
-            this.awsSecret = awsSecretAccessKey;
-            this.s3Client = AWSClientFactory.CreateAmazonS3Client(awsKey, awsSecret);
+            awsKey = awsAccessKeyId;
+            awsSecret = awsSecretAccessKey;
+            region = Region;
+            s3Client = new AmazonS3Client(awsKey, awsSecret, RegionEndpoint.GetBySystemName(region));
 
             // configuration
             ServicePointManager.DefaultConnectionLimit = 20;
@@ -140,7 +142,7 @@ namespace s3
                         Console.Write(",");
                         Console.Write("\"" + s3obj.Key + "\"");
                         Console.Write(",");
-                        Console.Write("\"" + DateTime.Parse(s3obj.LastModified).ToString() + "\"");
+                        Console.Write("\"" + s3obj.LastModified.ToString() + "\"");
                         Console.Write(",");
                         Console.WriteLine(s3obj.Size);
                     }
@@ -253,13 +255,13 @@ namespace s3
 
 		public void put(string bucket, string file, string key)
 		{
-            s3Put put = new s3Put(awsKey, awsSecret, bucket, file, key, maxRetry, ACL, putTimeout);
+            s3Put put = new s3Put(awsKey, awsSecret, region, bucket, file, key, maxRetry, ACL, putTimeout);
             put.Run(null);
 		}
 
         public void put(string bucket, string file, string key, string acl)
         {
-            s3Put put = new s3Put(awsKey, awsSecret, bucket, file, key, maxRetry, acl, putTimeout);
+            s3Put put = new s3Put(awsKey, awsSecret, region, bucket, file, key, maxRetry, acl, putTimeout);
             put.Run(null);
         }
 
@@ -278,7 +280,7 @@ namespace s3
 				foreach (string file in files)
                 {
                     string key = file.Substring(file.LastIndexOf('\\') + 1);
-                    s3Put put = new s3Put(awsKey, awsSecret, bucket, file, key, maxRetry, ACL, putTimeout);
+                    s3Put put = new s3Put(awsKey, awsSecret, region, bucket, file, key, maxRetry, ACL, putTimeout);
                     threads.QueueUserWorkItem(new WaitCallback(put.Run));
 				}
 
@@ -306,7 +308,7 @@ namespace s3
                 foreach (string file in files)
                 {
                     string key = file.Substring(file.LastIndexOf('\\') + 1);
-                    s3Put put = new s3Put(awsKey, awsSecret, bucket, file, key, maxRetry, ACL, putTimeout);
+                    s3Put put = new s3Put(awsKey, awsSecret, region, bucket, file, key, maxRetry, ACL, putTimeout);
                     threads.QueueUserWorkItem(new WaitCallback(put.Run));
                 }
 
@@ -334,7 +336,7 @@ namespace s3
                 foreach (string file in files)
                 {
                     string key = file.Substring(file.LastIndexOf('\\') + 1);
-                    s3Put put = new s3Put(awsKey, awsSecret, bucket, file, key, maxRetry, ACL, putTimeout);
+                    s3Put put = new s3Put(awsKey, awsSecret, bucket, region, file, key, maxRetry, ACL, putTimeout);
                     threads.QueueUserWorkItem(new WaitCallback(put.Run));
                 }
 
@@ -366,7 +368,7 @@ namespace s3
                     if(file.Trim() != "")
                     {
                         string key = file.Substring(file.LastIndexOf('\\') + 1);
-                        s3Put put = new s3Put(awsKey, awsSecret, bucket, file, key, maxRetry, ACL, putTimeout);
+                        s3Put put = new s3Put(awsKey, awsSecret, region, bucket, file, key, maxRetry, ACL, putTimeout);
                         threads.QueueUserWorkItem(new WaitCallback(put.Run));
                     }
                 }
@@ -399,7 +401,7 @@ namespace s3
 
         public void get(string bucket, string key, string dir)
         {
-            s3Get get = new s3Get(awsKey, awsSecret, bucket, dir, key, maxRetry);
+            s3Get get = new s3Get(awsKey, awsSecret, region, bucket, dir, key, maxRetry);
             get.Run(null);
         }
 
@@ -422,7 +424,7 @@ namespace s3
                     if (file.Trim() != "")
                     {
                         string key = file.Substring(file.LastIndexOf('\\') + 1);
-                        s3Get get = new s3Get(awsKey, awsSecret, bucket, outputdir, key, maxRetry);
+                        s3Get get = new s3Get(awsKey, awsSecret, region, bucket, outputdir, key, maxRetry);
                         threads.QueueUserWorkItem(new WaitCallback(get.Run));
                     }
                 }

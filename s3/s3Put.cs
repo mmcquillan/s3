@@ -15,6 +15,7 @@ namespace s3
         // properties
         private string awsKey;
         private string awsSecret;
+        private string region;
         private string bucket;
         private string file;
         private string key;
@@ -23,10 +24,11 @@ namespace s3
         private int timeout;
         
         // constructer
-        public s3Put(string awsAccessKeyId, string awsSecretAccessKey, string Bucket, string File, string Key, int Retry, string ACL, int PutTimeout)
+        public s3Put(string awsAccessKeyId, string awsSecretAccessKey, string Region, string Bucket, string File, string Key, int Retry, string ACL, int PutTimeout)
         {
             awsKey = awsAccessKeyId;
             awsSecret = awsSecretAccessKey;
+            region = Region;
             bucket = Bucket;
             file = File;
             key = Key;
@@ -44,7 +46,7 @@ namespace s3
             {
 
                 // make the amazon client
-                AmazonS3 s3Client = AWSClientFactory.CreateAmazonS3Client(awsKey, awsSecret);
+                AmazonS3Client s3Client = new AmazonS3Client(awsKey, awsSecret, RegionEndpoint.GetBySystemName(region));
 
                 try
                 {
@@ -55,20 +57,20 @@ namespace s3
                     req.Key = key;
                     req.FilePath = file;
                     req.CannedACL = ACL();
-                    req.Timeout = 120 * 60 * 1000;
+                    req.Timeout = new TimeSpan(2, 0, 0);
                     
                     // set the appropriate mime type
                     if (file.Contains("."))
                     {
                         string ext = file.Substring(file.LastIndexOf('.'));
                         string mime = AmazonS3Util.MimeTypeFromExtension(ext);
-                        req.AddHeader("content-type", mime);
+                        req.Headers.ContentType = mime;
                     }
 
                     // set timeout
                     if(timeout > 0)
                     {
-                        req.Timeout = timeout;
+                        req.Timeout = new TimeSpan(0, 0, timeout);
                     }
 
                     // put the object
@@ -107,28 +109,20 @@ namespace s3
             {
                 case "AuthenticatedRead":
                     return S3CannedACL.AuthenticatedRead;
-                    break;
                 case "BucketOwnerFullControl":
                     return S3CannedACL.BucketOwnerFullControl;
-                    break;
                 case "BucketOwnerRead":
                     return S3CannedACL.BucketOwnerRead;
-                    break;
                 case "NoACL":
                     return S3CannedACL.NoACL;
-                    break;
                 case "Private":
                     return S3CannedACL.Private;
-                    break;
                 case "PublicRead":
                     return S3CannedACL.PublicRead;
-                    break;
                 case "PublicReadWrite":
                     return S3CannedACL.PublicReadWrite;
-                    break;
                 default:
                     return S3CannedACL.NoACL;
-                    break;
             }
         }
 

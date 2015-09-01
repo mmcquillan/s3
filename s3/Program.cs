@@ -16,7 +16,7 @@ namespace s3
             
             // initialize app
             config = ConfigurationManager.AppSettings;
-            s3 = new s3cmd(config["AWSAccessKey"], config["AWSSecretKey"]);
+            s3 = new s3cmd(config["AWSAccessKey"], config["AWSSecretKey"], config["Region"]);
             s3.accesscontrol(config["ACL"]);
             s3.threads(Int32.Parse(config["Threads"]));
             s3.retry(Int32.Parse(config["Retries"]));
